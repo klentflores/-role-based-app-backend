@@ -1,4 +1,4 @@
-    // server.js
+// server.js
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -18,10 +18,9 @@ app.use(express.json());
 
 // In-memory "database" (replace with MongoDB later)
 let users = [
-    { id: 1, username: 'admin', password: '$2a$10$...', role: 'admin' },
-    { id: 2, username: 'alice', password: '$2a$10$...', role: 'user' }
-];  
-
+    { id: 1, username: 'admin', password: bcrypt.hashSync('admin123', 10), role: 'admin' },
+    { id: 2, username: 'klent', password: bcrypt.hashSync('user123', 10), role: 'user' }
+]; 
 
 // Hash passwords if not already hashed
 if (!users[0].password.includes('$2a$')) {
@@ -103,18 +102,19 @@ function authenticateToken(req, res, next) {
     });
 }
 
-// Start server
-app.listen(PORT, () => {
-    console.log(`Backend running on http://localhost:${PORT}`);
-    console.log(`Try logging in with:`);
-    console.log(`  - Admin: username=admin, password=admin123`);
-    console.log(`  - User: username=alice, password=user123`);
-});
+function authorizeRole(role) {
+    return (req, res, next) => {
+        if (req.user.role !== role) {
+            return res.status(403).json({ error: 'Access denied' });
+        }
+        next();
+    };
+}
 
 // Start server
 app.listen(PORT, () => {
     console.log(`Backend running on http://localhost:${PORT}`);
     console.log(`Try logging in with:`);
     console.log(`  - Admin: username=admin, password=admin123`);
-    console.log(`  - User: username=alice, password=user123`);
+    console.log(`  - User: username=klent, password=user123`);
 });
